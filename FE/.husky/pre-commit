@@ -1,0 +1,4 @@
+#!/bin/sh
+cd FE
+pnpm exec lint-staged
+pnpm tsc --noEmit

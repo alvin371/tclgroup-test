@@ -1,0 +1,9 @@
+DROP INDEX IF EXISTS idx_inventories_product_id;
+DROP INDEX IF EXISTS idx_stock_ins_product_id;
+DROP INDEX IF EXISTS idx_stock_ins_status;
+DROP INDEX IF EXISTS idx_stock_outs_product_id;
+DROP INDEX IF EXISTS idx_stock_outs_status;
+DROP INDEX IF EXISTS idx_reservations_product;
+DROP INDEX IF EXISTS idx_reservations_stockout;
+DROP INDEX IF EXISTS idx_histories_entity;
+DROP INDEX IF EXISTS idx_products_sku;

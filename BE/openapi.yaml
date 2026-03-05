@@ -1,0 +1,851 @@
+openapi: 3.0.3
+info:
+  title: Stock Management API
+  description: API for managing inventory, stock-in, stock-out operations and reports
+  version: 1.0.0
+  contact:
+    name: TCL Group
+servers:
+  - url: http://localhost:8080/api/v1
+    description: Local development server
+
+tags:
+  - name: Products
+    description: Product management operations
+  - name: Stock In
+    description: Stock-in operations
+  - name: Stock Out
+    description: Stock-out operations
+  - name: Inventory
+    description: Inventory management
+  - name: Reports
+    description: Reporting endpoints
+
+paths:
+  /products:
+    post:
+      tags:
+        - Products
+      summary: Create a new product
+      operationId: createProduct
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateProductRequest'
+            example:
+              sku: "SKU-001"
+              name: "Product A"
+              customer_id: "550e8400-e29b-41d4-a716-446655440000"
+      responses:
+        '201':
+          description: Product created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+              example:
+                success: true
+                message: "Success create data."
+                data:
+                  id: "123e4567-e89b-12d3-a456-426614174000"
+                  sku: "SKU-001"
+                  name: "Product A"
+                  customer_id: "550e8400-e29b-41d4-a716-446655440000"
+                  created_at: "2026-03-05T02:30:00Z"
+                  updated_at: "2026-03-05T02:30:00Z"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+    get:
+      tags:
+        - Products
+      summary: List all products
+      operationId: listProducts
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/PerPageParam'
+      responses:
+        '200':
+          description: Products retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedResponse'
+              example:
+                success: true
+                message: "Success get all data."
+                data:
+                  - id: "123e4567-e89b-12d3-a456-426614174000"
+                    sku: "SKU-001"
+                    name: "Product A"
+                    customer_id: "550e8400-e29b-41d4-a716-446655440000"
+                    created_at: "2026-03-05T02:30:00Z"
+                    updated_at: "2026-03-05T02:30:00Z"
+                pagination:
+                  page: 1
+                  per_page: 10
+                  total: 1
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /stock-in:
+    post:
+      tags:
+        - Stock In
+      summary: Create a new stock-in record
+      operationId: createStockIn
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateStockInRequest'
+            example:
+              product_id: "123e4567-e89b-12d3-a456-426614174000"
+              quantity: 100
+              notes: "Initial stock"
+      responses:
+        '201':
+          description: Stock-in created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+              example:
+                success: true
+                message: "Success create data."
+                data:
+                  id: "789e4567-e89b-12d3-a456-426614174000"
+                  product_id: "123e4567-e89b-12d3-a456-426614174000"
+                  quantity: 100
+                  status: "pending"
+                  notes: "Initial stock"
+                  created_at: "2026-03-05T02:30:00Z"
+                  updated_at: "2026-03-05T02:30:00Z"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+    get:
+      tags:
+        - Stock In
+      summary: List all stock-in records
+      operationId: listStockIn
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/PerPageParam'
+        - name: status
+          in: query
+          description: Filter by status
+          schema:
+            type: string
+            enum: [pending, received, cancelled]
+      responses:
+        '200':
+          description: Stock-in records retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedResponse'
+              example:
+                success: true
+                message: "Success get all data."
+                data:
+                  - id: "789e4567-e89b-12d3-a456-426614174000"
+                    product_id: "123e4567-e89b-12d3-a456-426614174000"
+                    quantity: 100
+                    status: "pending"
+                    notes: "Initial stock"
+                    created_at: "2026-03-05T02:30:00Z"
+                    updated_at: "2026-03-05T02:30:00Z"
+                pagination:
+                  page: 1
+                  per_page: 10
+                  total: 1
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /stock-in/{id}/advance:
+    patch:
+      tags:
+        - Stock In
+      summary: Advance stock-in status
+      operationId: advanceStockIn
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Stock-in ID
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdvanceStockInRequest'
+            example:
+              status: "received"
+      responses:
+        '200':
+          description: Stock-in status updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+              example:
+                success: true
+                message: "Success update data."
+                data:
+                  id: "789e4567-e89b-12d3-a456-426614174000"
+                  product_id: "123e4567-e89b-12d3-a456-426614174000"
+                  quantity: 100
+                  status: "received"
+                  notes: "Initial stock"
+                  created_at: "2026-03-05T02:30:00Z"
+                  updated_at: "2026-03-05T02:35:00Z"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /stock-in/{id}:
+    delete:
+      tags:
+        - Stock In
+      summary: Cancel a stock-in record
+      operationId: cancelStockIn
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Stock-in ID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Stock-in cancelled successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+              example:
+                success: true
+                message: "Success delete data."
+                data: null
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /stock-out/allocate:
+    post:
+      tags:
+        - Stock Out
+      summary: Allocate stock for outbound
+      operationId: allocateStockOut
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AllocateStockOutRequest'
+            example:
+              product_id: "123e4567-e89b-12d3-a456-426614174000"
+              quantity: 50
+              notes: "Order #12345"
+      responses:
+        '201':
+          description: Stock-out allocated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+              example:
+                success: true
+                message: "Success create data."
+                data:
+                  id: "999e4567-e89b-12d3-a456-426614174000"
+                  product_id: "123e4567-e89b-12d3-a456-426614174000"
+                  quantity: 50
+                  status: "allocated"
+                  notes: "Order #12345"
+                  created_at: "2026-03-05T02:30:00Z"
+                  updated_at: "2026-03-05T02:30:00Z"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /stock-out:
+    get:
+      tags:
+        - Stock Out
+      summary: List all stock-out records
+      operationId: listStockOut
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/PerPageParam'
+        - name: status
+          in: query
+          description: Filter by status
+          schema:
+            type: string
+            enum: [allocated, picked, shipped, cancelled]
+      responses:
+        '200':
+          description: Stock-out records retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedResponse'
+              example:
+                success: true
+                message: "Success get all data."
+                data:
+                  - id: "999e4567-e89b-12d3-a456-426614174000"
+                    product_id: "123e4567-e89b-12d3-a456-426614174000"
+                    quantity: 50
+                    status: "allocated"
+                    notes: "Order #12345"
+                    created_at: "2026-03-05T02:30:00Z"
+                    updated_at: "2026-03-05T02:30:00Z"
+                pagination:
+                  page: 1
+                  per_page: 10
+                  total: 1
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /stock-out/{id}/execute:
+    patch:
+      tags:
+        - Stock Out
+      summary: Execute stock-out status transition
+      operationId: executeStockOut
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Stock-out ID
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExecuteStockOutRequest'
+            example:
+              status: "picked"
+      responses:
+        '200':
+          description: Stock-out status updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+              example:
+                success: true
+                message: "Success update data."
+                data:
+                  id: "999e4567-e89b-12d3-a456-426614174000"
+                  product_id: "123e4567-e89b-12d3-a456-426614174000"
+                  quantity: 50
+                  status: "picked"
+                  notes: "Order #12345"
+                  created_at: "2026-03-05T02:30:00Z"
+                  updated_at: "2026-03-05T02:35:00Z"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /stock-out/{id}:
+    delete:
+      tags:
+        - Stock Out
+      summary: Cancel a stock-out record
+      operationId: cancelStockOut
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Stock-out ID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Stock-out cancelled successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+              example:
+                success: true
+                message: "Success delete data."
+                data: null
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /inventory:
+    get:
+      tags:
+        - Inventory
+      summary: List all inventory records
+      operationId: listInventory
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/PerPageParam'
+      responses:
+        '200':
+          description: Inventory records retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedResponse'
+              example:
+                success: true
+                message: "Success get all data."
+                data:
+                  - id: "111e4567-e89b-12d3-a456-426614174000"
+                    product_id: "123e4567-e89b-12d3-a456-426614174000"
+                    product_sku: "SKU-001"
+                    product_name: "Product A"
+                    physical_stock: 100
+                    reserved: 50
+                    available_stock: 50
+                    updated_at: "2026-03-05T02:30:00Z"
+                pagination:
+                  page: 1
+                  per_page: 10
+                  total: 1
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /inventory/{product_id}/adjust:
+    patch:
+      tags:
+        - Inventory
+      summary: Adjust inventory stock quantity
+      operationId: adjustInventory
+      parameters:
+        - name: product_id
+          in: path
+          required: true
+          description: Product ID
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdjustStockRequest'
+            example:
+              new_qty: 150
+              notes: "Manual adjustment"
+      responses:
+        '200':
+          description: Inventory adjusted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+              example:
+                success: true
+                message: "Success update data."
+                data: null
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /reports/stock-in:
+    get:
+      tags:
+        - Reports
+      summary: Get stock-in report
+      operationId: getStockInReport
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/PerPageParam'
+      responses:
+        '200':
+          description: Stock-in report retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedResponse'
+              example:
+                success: true
+                message: "Success get all data."
+                data:
+                  - id: "789e4567-e89b-12d3-a456-426614174000"
+                    product_id: "123e4567-e89b-12d3-a456-426614174000"
+                    quantity: 100
+                    status: "received"
+                    notes: "Initial stock"
+                    created_at: "2026-03-05T02:30:00Z"
+                    updated_at: "2026-03-05T02:35:00Z"
+                pagination:
+                  page: 1
+                  per_page: 10
+                  total: 1
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+  /reports/stock-out:
+    get:
+      tags:
+        - Reports
+      summary: Get stock-out report
+      operationId: getStockOutReport
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/PerPageParam'
+      responses:
+        '200':
+          description: Stock-out report retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedResponse'
+              example:
+                success: true
+                message: "Success get all data."
+                data:
+                  - id: "999e4567-e89b-12d3-a456-426614174000"
+                    product_id: "123e4567-e89b-12d3-a456-426614174000"
+                    quantity: 50
+                    status: "shipped"
+                    notes: "Order #12345"
+                    created_at: "2026-03-05T02:30:00Z"
+                    updated_at: "2026-03-05T02:40:00Z"
+                pagination:
+                  page: 1
+                  per_page: 10
+                  total: 1
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
+components:
+  parameters:
+    PageParam:
+      name: page
+      in: query
+      description: Page number (starts from 1)
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    PerPageParam:
+      name: per_page
+      in: query
+      description: Number of items per page
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 10
+
+  schemas:
+    CreateProductRequest:
+      type: object
+      required:
+        - sku
+        - name
+        - customer_id
+      properties:
+        sku:
+          type: string
+          description: Product SKU
+        name:
+          type: string
+          description: Product name
+        customer_id:
+          type: string
+          format: uuid
+          description: Customer UUID
+
+    CreateStockInRequest:
+      type: object
+      required:
+        - product_id
+        - quantity
+      properties:
+        product_id:
+          type: string
+          format: uuid
+          description: Product UUID
+        quantity:
+          type: integer
+          format: int64
+          minimum: 1
+          description: Quantity to stock in
+        notes:
+          type: string
+          description: Additional notes
+
+    AdvanceStockInRequest:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          enum: [received]
+          description: New status
+
+    AllocateStockOutRequest:
+      type: object
+      required:
+        - product_id
+        - quantity
+      properties:
+        product_id:
+          type: string
+          format: uuid
+          description: Product UUID
+        quantity:
+          type: integer
+          format: int64
+          minimum: 1
+          description: Quantity to allocate
+        notes:
+          type: string
+          description: Additional notes
+
+    ExecuteStockOutRequest:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          enum: [picked, shipped]
+          description: New status
+
+    AdjustStockRequest:
+      type: object
+      required:
+        - new_qty
+      properties:
+        new_qty:
+          type: integer
+          format: int64
+          minimum: 0
+          description: New quantity
+        notes:
+          type: string
+          description: Adjustment notes
+
+    ProductResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        sku:
+          type: string
+        name:
+          type: string
+        customer_id:
+          type: string
+          format: uuid
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    InventoryResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        product_id:
+          type: string
+          format: uuid
+        product_sku:
+          type: string
+        product_name:
+          type: string
+        physical_stock:
+          type: integer
+          format: int64
+        reserved:
+          type: integer
+          format: int64
+        available_stock:
+          type: integer
+          format: int64
+        updated_at:
+          type: string
+          format: date-time
+
+    StockInResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        product_id:
+          type: string
+          format: uuid
+        quantity:
+          type: integer
+          format: int64
+        status:
+          type: string
+          enum: [pending, received, cancelled]
+        notes:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    StockOutResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        product_id:
+          type: string
+          format: uuid
+        quantity:
+          type: integer
+          format: int64
+        status:
+          type: string
+          enum: [allocated, picked, shipped, cancelled]
+        notes:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          type: object
+
+    PaginatedResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          type: array
+          items:
+            type: object
+        pagination:
+          type: object
+          properties:
+            page:
+              type: integer
+            per_page:
+              type: integer
+            total:
+              type: integer
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: "INVALID_REQUEST"
+              message: "Invalid request parameters"
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: "NOT_FOUND"
+              message: "Resource not found"
+
+    InternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            error:
+              code: "INTERNAL_ERROR"
+              message: "An internal error occurred"

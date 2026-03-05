@@ -1,0 +1,16 @@
+export const ENDPOINTS = {
+  PRODUCTS: '/products',
+  STOCK_IN: '/stock-in',
+  STOCK_IN_DETAIL: (id: string) => `/stock-in/${id}`,
+  STOCK_IN_ADVANCE: (id: string) => `/stock-in/${id}/advance`,
+  STOCK_IN_DELETE: (id: string) => `/stock-in/${id}`,
+  STOCK_OUT: '/stock-out',
+  STOCK_OUT_ALLOCATE: '/stock-out/allocate',
+  STOCK_OUT_DETAIL: (id: string) => `/stock-out/${id}`,
+  STOCK_OUT_EXECUTE: (id: string) => `/stock-out/${id}/execute`,
+  STOCK_OUT_DELETE: (id: string) => `/stock-out/${id}`,
+  INVENTORY: '/inventory',
+  INVENTORY_ADJUST: (productId: string) => `/inventory/${productId}/adjust`,
+  REPORTS_STOCK_IN: '/reports/stock-in',
+  REPORTS_STOCK_OUT: '/reports/stock-out',
+} as const

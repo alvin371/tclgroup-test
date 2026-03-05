@@ -1,0 +1,47 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: stock_management
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  migrate:
+    image: migrate/migrate:v4.19.1
+    command: ["-path", "/migrations", "-database", "${DATABASE_DSN}", "up"]
+    volumes:
+      - ./db/migrations:/migrations
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  api:
+    build: .
+    ports:
+      - "8080:8080"
+    env_file: .env
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  seed:
+    build: .
+    command: ["./seed"]
+    env_file: .env
+    profiles:
+      - seed
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+volumes:
+  postgres_data:

@@ -1,0 +1,57 @@
+run:
+  timeout: 5m
+  go: "1.22"
+
+linters:
+  enable:
+    - errcheck
+    - gosimple
+    - govet
+    - ineffassign
+    - staticcheck
+    - unused
+    - gofmt
+    - goimports
+    - godot
+    - misspell
+    - revive
+    - noctx
+    - bodyclose
+    - exhaustive
+    - exportloopref
+    - gocritic
+    - gosec
+    - nilerr
+    - prealloc
+    - unparam
+    - wrapcheck
+
+linters-settings:
+  goimports:
+    local-prefixes: github.com/tclgroup/stock-management
+  revive:
+    rules:
+      - name: exported
+        severity: warning
+  gosec:
+    excludes:
+      - G404
+  wrapcheck:
+    ignoreSigs:
+      - .Errorf(
+      - errors.New(
+      - errors.Unwrap(
+      - .Wrap(
+      - .WrapIf(
+      - .WithStack(
+
+issues:
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - errcheck
+        - gosec
+        - wrapcheck
+    - path: cmd/
+      linters:
+        - wrapcheck

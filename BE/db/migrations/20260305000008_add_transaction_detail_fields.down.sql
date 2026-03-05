@@ -1,0 +1,2 @@
+ALTER TABLE stock_ins  DROP COLUMN IF EXISTS unit_price, DROP COLUMN IF EXISTS performed_by, DROP COLUMN IF EXISTS location;
+ALTER TABLE stock_outs DROP COLUMN IF EXISTS unit_price, DROP COLUMN IF EXISTS performed_by, DROP COLUMN IF EXISTS location;
